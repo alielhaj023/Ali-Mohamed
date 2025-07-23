@@ -1,0 +1,46 @@
+name: Code Coverage
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # services:
+    #   postgres:
+    #     image: postgres:latest
+    #     env:
+    #       POSTGRES_DB: test_db
+    #       POSTGRES_USER: test_user
+    #       POSTGRES_PASSWORD: test_password
+    #     ports:
+    #       - "5432:5432"
+    
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pip install pytest pytest-django coverage
+
+      - name: Run tests with Coverage
+        run: |
+          source venv/bin/activate
+          coverage run -m pytest
+          coverage report --fail-under=90  # Adjust threshold if needed
